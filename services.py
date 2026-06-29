@@ -1,81 +1,115 @@
-from schemas import RunRateRequest
+class MatchScoreboardService:
 
+    matches = {
 
-class RunRateService:
-    """
-    Service class for calculating cricket run rates.
-    """
+        1: {
+            "match": "India vs Australia",
+            "venue": "Wankhede Stadium",
 
-    @staticmethod
-    def calculate_run_rate(payload: RunRateRequest):
-        current_runs = payload.current_runs
-        overs = payload.overs
-        balls = payload.balls
-        total_overs = payload.total_overs
-        target = payload.target
+            "innings_number": 2,
 
-        total_match_balls = total_overs * 6
-        balls_played = (overs * 6) + balls
+            "batting_team": "India",
+            "bowling_team": "Australia",
 
-        if balls_played == 0:
-            current_run_rate = 0
-        else:
-            overs_played_decimal = balls_played / 6
-            current_run_rate = current_runs / overs_played_decimal
+            "runs": 152,
+            "wickets": 3,
 
-        overs_played = balls_played / 6
+            "overs": 17,
+            "balls": 2,
 
-        response = {
-            "current_runs": current_runs,
-            "overs_played": round(overs_played, 2),
-            "balls_played": balls_played,
-            "current_run_rate": round(current_run_rate, 2),
-            "is_chasing": target is not None,
-            "target": target,
-            "runs_required": None,
-            "balls_remaining": None,
-            "overs_remaining": None,
-            "required_run_rate": None,
-            "message": ""
+            "top_batter": {
+                "name": "Virat Kohli",
+                "runs": 68
+            },
+
+            "top_bowler": {
+                "name": "Mitchell Starc",
+                "wickets": 2
+            },
+
+            "recent_balls": [
+                "1",
+                "4",
+                "W",
+                "0",
+                "6",
+                "2"
+            ]
+        },
+
+        2: {
+            "match": "England vs Pakistan",
+            "venue": "Lord's",
+
+            "innings_number": 1,
+
+            "batting_team": "England",
+            "bowling_team": "Pakistan",
+
+            "runs": 210,
+            "wickets": 5,
+
+            "overs": 25,
+            "balls": 4,
+
+            "top_batter": {
+                "name": "Joe Root",
+                "runs": 92
+            },
+
+            "top_bowler": {
+                "name": "Shaheen Afridi",
+                "wickets": 3
+            },
+
+            "recent_balls": [
+                "0",
+                "1",
+                "4",
+                "6",
+                "2",
+                "1"
+            ]
         }
 
-        if balls_played > total_match_balls:
-            raise ValueError("Balls played cannot be greater than total match balls.")
+    }
 
-        if target is not None:
-            runs_required = target - current_runs
-            balls_remaining = total_match_balls - balls_played
-            overs_remaining = balls_remaining / 6
+    @staticmethod
+    def get_scoreboard(match_id: int):
 
-            if runs_required <= 0:
-                response["runs_required"] = 0
-                response["balls_remaining"] = balls_remaining
-                response["overs_remaining"] = round(overs_remaining, 2)
-                response["required_run_rate"] = 0
-                response["message"] = "Target has already been achieved."
+        match = MatchScoreboardService.matches.get(match_id)
 
-            elif balls_remaining == 0:
-                response["runs_required"] = runs_required
-                response["balls_remaining"] = 0
-                response["overs_remaining"] = 0
-                response["required_run_rate"] = None
-                response["message"] = "Innings is over. Target was not achieved."
+        if match is None:
+            return None
 
-            else:
-                required_run_rate = runs_required / overs_remaining
+        total_balls = (match["overs"] * 6) + match["balls"]
 
-                response["runs_required"] = runs_required
-                response["balls_remaining"] = balls_remaining
-                response["overs_remaining"] = round(overs_remaining, 2)
-                response["required_run_rate"] = round(required_run_rate, 2)
-                response["message"] = (
-                    f"Team needs {runs_required} runs from {balls_remaining} balls "
-                    f"at {round(required_run_rate, 2)} runs per over."
-                )
+        run_rate = round(
+            match["runs"] / (total_balls / 6),
+            2
+        )
 
-        else:
-            response["message"] = (
-                f"Current run rate is {round(current_run_rate, 2)} runs per over."
-            )
+        return {
 
-        return response
+            "match": match["match"],
+
+            "venue": match["venue"],
+
+            "innings_number": match["innings_number"],
+
+            "batting_team": match["batting_team"],
+
+            "bowling_team": match["bowling_team"],
+
+            "score": f'{match["runs"]}/{match["wickets"]}',
+
+            "overs": f'{match["overs"]}.{match["balls"]}',
+
+            "run_rate": run_rate,
+
+            "top_batter": match["top_batter"],
+
+            "top_bowler": match["top_bowler"],
+
+            "recent_balls": match["recent_balls"]
+        }

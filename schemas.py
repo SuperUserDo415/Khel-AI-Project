@@ -1,40 +1,31 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel
+from typing import List
 
 
-class RunRateRequest(BaseModel):
-    current_runs: int = Field(..., ge=0, description="Runs scored by the batting team so far")
-    wickets_lost: Optional[int] = Field(None, ge=0, le=10, description="Wickets lost so far")
-
-    overs: int = Field(..., ge=0, description="Completed overs")
-    balls: int = Field(..., ge=0, le=5, description="Balls in the current over, from 0 to 5")
-
-    total_overs: int = Field(..., gt=0, description="Total overs in the match, e.g. 20 or 50")
-    
-    itarget : Optional[int] = Field(
-        None, gt=0, 
-        description="Imaginary target score for first team. Example: If the first team score 180, they can defend this target easily.")
-    
-    target: Optional[int] = Field(
-        None,
-        gt=0,
-        description="Target score for chasing team. Example: if first team made 180, target is 181"
-    )
+class Batter(BaseModel):
+    name: str
+    runs: int
 
 
-class RunRateResponse(BaseModel):
-    current_runs: int
-    overs_played: float
-    balls_played: int
+class Bowler(BaseModel):
+    name: str
+    wickets: int
 
-    current_run_rate: float
 
-    is_chasing: bool
+class MatchScoreboardResponse(BaseModel):
+    match: str
+    venue: str
 
-    target: Optional[int] = None
-    runs_required: Optional[int] = None
-    balls_remaining: Optional[int] = None
-    overs_remaining: Optional[float] = None
-    required_run_rate: Optional[float] = None
+    innings_number: int
 
-    message: str
+    batting_team: str
+    bowling_team: str
+
+    score: str
+    overs: str
+    run_rate: float
+
+    top_batter: Batter
+    top_bowler: Bowler
+
+    recent_balls: List[str]
