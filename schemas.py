@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import List
-
+class MatchScoreboardRequest(BaseModel):
+    match_id: int
 
 class Batter(BaseModel):
     name: str
